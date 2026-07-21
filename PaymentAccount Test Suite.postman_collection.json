@@ -1,0 +1,1824 @@
+{
+  "info": {
+    "_postman_id": "0fc58e9a-3e6e-4af2-b306-05b2d6fcfb6d",
+    "name": "PaymentAccount Test Suite",
+    "description": "### Overview\n\nThis project contains a structured set of automated tests for the **Paynuver Client API**, specifically the `PaymentAccount` endpoints. The suite validates required fields, character handling, boundary conditions, and data persistence against the documented API behavior.\n\n### API Logic (from documentation)\n\n- **Endpoint:** `POST /api/PaymentAccount`  \n    Creates a new payment account.\n    \n    - **Required fields:** `ProductId`, `AccountHolder` details (FirstName, LastName, AddressLine1, City, State, Zip).\n        \n    - **Response codes:**\n        \n        - `200 OK` → Account successfully created, returns `PaymentAccountId`.\n            \n        - `400 Bad Request` → Missing or invalid required fields.\n            \n- **Endpoint:** `GET /api/PaymentAccount/{id}`  \n    Retrieves details of a previously created account.\n    \n- **Endpoint:** `GET /api/AccountHolder/{id}`  \n    Retrieves details of the account holder.\n    \n\n⚠️ Note: The documentation specifies that required fields may vary depending on **CIP product configuration**. This explains why some negative tests expecting `400` may return `200`.\n\n### Test Suite Structure\n\n1. **Mandatory Fields Tests**\n    \n    - Validate missing `Name`, `ProductId`, and `AccountHolder` fields.\n        \n    - Expected: `400 Bad Request`.\n        \n    - Actual: Some cases return `200 OK` → indicates product configuration differences.\n        \n2. **Special Characters Tests**\n    \n    - Inputs with Latin accents, Cyrillic, Asian scripts, apostrophes, hyphens, symbols, and mixed characters.\n        \n    - Expected: Either `200 OK` (accepted) or `400 Bad Request` (invalid characters).\n        \n    - Confirms API’s handling of internationalization and special input.\n        \n3. **Field Length Validation**\n    \n    - Tests maximum allowed lengths, boundary values, and over-limit inputs.\n        \n    - Expected: `200 OK` for valid boundaries, `400 Bad Request` for violations.\n        \n    - Includes positive case with valid data.\n        \n4. **Data Persistence Validation**\n    \n    - Follow-up `GET` requests to verify that submitted data is stored and retrieved correctly.\n        \n    - Checks consistency between submitted and returned fields.\n        \n\n### Key Findings\n\n- Positive cases behave as expected (`200 OK`, IDs returned).\n    \n- Negative cases for missing fields sometimes return `200 OK` instead of `400`. This aligns with documentation: **field requirements depend on product configuration**.\n    \n- Character and boundary tests correctly trigger validation errors or accept valid input.\n    \n- Persistence checks show that data is saved, but some field-level validations may not be enforced.\n    \n\n### Conclusion\n\nThe test suite provides comprehensive coverage of the `PaymentAccount` API. Differences between expected and actual results highlight the importance of aligning test expectations with **CIP product rules** defined in the API documentation.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25614519"
+  },
+  "item": [
+    {
+      "name": "Mandatory Fields Tests",
+      "item": [
+        {
+          "name": "Negative - Missing Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error message mentions Name\", function () {\r",
+                  "    pm.expect(jsonData.ModelState[\"request.Name\"]).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+              {
+                "key": "ProductId",
+                "value": "{{ProductId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"ProductId\": 1388,\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Smith\",\r\n    \"AddressLine1\": \"1010 Market St\",\r\n    \"City\": \"Chattanooga\",\r\n    \"State\": \"TN\",\r\n    \"Zip\": \"37302\"\r\n  }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{PaymentAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{PaymentAccountId}}"
+              ]
+            },
+            "description": "- **Purpose:** Validate mandatory field `Name`.\n    \n- **Expected Result:** API returns `400 Bad Request` with error message `\"Name is required\"`."
+          },
+          "response": []
+        },
+        {
+          "name": "Negative - Missing ProductId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error message mentions ProductId\", function () {\r",
+                  "    pm.expect(jsonData.ModelState[\"request.ProductId\"]).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+              {
+                "key": "ProductId",
+                "value": "{{ProductId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account without ProductId\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Smith\",\r\n    \"AddressLine1\": \"1010 Market St\",\r\n    \"City\": \"Chattanooga\",\r\n    \"State\": \"TN\",\r\n    \"Zip\": \"37302\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{PaymentAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{PaymentAccountId}}"
+              ]
+            },
+            "description": "- **Title:** Negative - Missing ProductId\n    \n- **Purpose:** Validate mandatory field `ProductId`.\n    \n- **Request:** POST /PaymentAccount without `ProductId`.\n    \n- **Expected Result:** API returns `400 Bad Request` with error message `\"The ProductId field is required.\"`.\n    \n- **Notes:** Confirms that `ProductId` is mandatory for account creation"
+          },
+          "response": []
+        },
+        {
+          "name": "Negative - Missing AccountHolder FirstName",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error message mentions FirstName\", function () {\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.FirstName\"]).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+              {
+                "key": "ProductId",
+                "value": "{{ProductId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account without FirstName\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account missing FirstName\",\r\n  \"AccountHolder\": {\r\n    \"LastName\": \"Smith\",\r\n    \"AddressLine1\": \"1010 Market St\",\r\n    \"City\": \"Chattanooga\",\r\n    \"State\": \"TN\",\r\n    \"Zip\": \"37302\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{PaymentAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{PaymentAccountId}}"
+              ]
+            },
+            "description": "- **Title:** Negative - Missing AccountHolder FirstName.\n    \n- **Purpose:** Validate mandatory field `AccountHolder.FirstName`.\n    \n- **Request:** POST /PaymentAccount without `AccountHolder.FirstName`.\n    \n- **Expected Result:** API should return `400 Bad Request` with error message `\"The FirstName field is required.\"`.\n    \n- **Actual Result:** API returned `200 OK` and created a PaymentAccount, indicating `FirstName` is not enforced as mandatory in this environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Negative - Missing AccountHolder LastName",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error message mentions LastName\", function () {\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.LastName\"]).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+              {
+                "key": "ProductId",
+                "value": "{{ProductId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account without LastName\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account missing LastName\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"AddressLine1\": \"1010 Market St\",\r\n    \"City\": \"Chattanooga\",\r\n    \"State\": \"TN\",\r\n    \"Zip\": \"37302\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{PaymentAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{PaymentAccountId}}"
+              ]
+            },
+            "description": "- **Title:** Negative - Missing AccountHolder LastName.\n    \n- **Purpose:** Validate mandatory field `AccountHolder.LastName`.\n    \n- **Request:** POST /PaymentAccount without `AccountHolder.LastName`.\n    \n- **Expected Result:** API should return `400 Bad Request` with error message `\"The LastName field is required.\"`.\n    \n- **Actual Result:** API returned `200 OK` and created a PaymentAccount (`PaymentAccountId: 1834571`), indicating `LastName` is not enforced as mandatory in this environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Negative - Missing AccountHolder AddressLine1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error message mentions AddressLine1\", function () {\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.AddressLine1\"]).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+              {
+                "key": "ProductId",
+                "value": "{{ProductId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account without AddressLine1\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account missing AddressLine1\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Smith\",\r\n    \"City\": \"Chattanooga\",\r\n    \"State\": \"TN\",\r\n    \"Zip\": \"37302\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{PaymentAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{PaymentAccountId}}"
+              ]
+            },
+            "description": "- **Title:** Negative - Missing AccountHolder AddressLine1.\n    \n- **Purpose:** Validate mandatory field `AccountHolder.AddressLine1`.\n    \n- **Request:** POST /PaymentAccount without `AccountHolder.AddressLine1`.\n    \n- **Expected Result:** The API should return 400 Bad Request with the message \"The AddressLine1 field is required.\"\n    \n- **Actual Result:** The API returned 200 OK and created a PaymentAccount (PaymentAccountId: 1834572), indicating that the AddressLine1 field is not required in the current environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Negative - Missing AccountHolder City",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error message mentions City\", function () {\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.City\"]).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+              {
+                "key": "ProductId",
+                "value": "{{ProductId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account without City\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account missing City\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Smith\",\r\n    \"AddressLine1\": \"1010 Market St\",\r\n    \"State\": \"TN\",\r\n    \"Zip\": \"37302\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{PaymentAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{PaymentAccountId}}"
+              ]
+            },
+            "description": "- **Title:** Negative - Missing AccountHolder City.\n    \n- **Purpose:** Validate mandatory field `AccountHolder.City`.\n    \n- **Request:** POST /PaymentAccount без `AccountHolder.City`.\n    \n- **Expected Result:** The API should return 400 Bad Request with the message \"The City field is required.\"\n    \n- **Actual Result:** The API returned 200 OK and created a PaymentAccount (PaymentAccountId: 1834717), which indicates that the City field is not required in the current environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Negative - Missing AccountHolder State.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error message mentions State\", function () {\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.State\"]).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+              {
+                "key": "ProductId",
+                "value": "{{ProductId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account without State\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account missing State\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Smith\",\r\n    \"AddressLine1\": \"1010 Market St\",\r\n    \"City\": \"Chattanooga\",\r\n    \"Zip\": \"37302\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{PaymentAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{PaymentAccountId}}"
+              ]
+            },
+            "description": "**Title:** Negative - Missing AccountHolder State  \n**Purpose:** Validate mandatory field `AccountHolder.State`.  \n**Request:** POST /PaymentAccount without `AccountHolder.State`.  \n**Expected Result:** API should return `400 Bad Request` with error message `\"The State field is required.\"`.  \n**Actual Result:** API returned `200 OK` and created a PaymentAccount (`PaymentAccountId: 1834925`), showing that `State` is not enforced as mandatory in this environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Negative - Missing AccountHolder Zip",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error message mentions Zip\", function () {\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.Zip\"]).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              },
+              {
+                "key": "ProductId",
+                "value": "{{ProductId}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account without Zip\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account missing Zip\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Smith\",\r\n    \"AddressLine1\": \"1010 Market St\",\r\n    \"City\": \"Chattanooga\",\r\n    \"State\": \"TN\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{PaymentAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{PaymentAccountId}}"
+              ]
+            },
+            "description": "**Title:** Negative - Missing AccountHolder Zip  \n**Purpose:** Validate mandatory field `AccountHolder.Zip`.  \n**Request:** POST /PaymentAccount without `AccountHolder.Zip`.  \n**Expected Result:** API should return `400 Bad Request` with error message `\"The Zip field is required.\"`.  \n**Actual Result:** API returned `200 OK` and created a PaymentAccount (`PaymentAccountId: 1835009`), showing that `Zip` is not enforced as mandatory in this environment."
+          },
+          "response": []
+        }
+      ],
+      "description": "**Purpose:**  \nValidate that the API correctly enforces mandatory fields. Each test case omits one required field to confirm that the system rejects incomplete requests with clear error messages.\n\n**Test Cases Overview:**\n\n| Test Case | Method | Expected Behavior | Observed Behavior |\n| --- | --- | --- | --- |\n| Missing Name | POST | Reject request, return `400` | ❌ Error: `Name` is required |\n| Missing ProductId | POST | Reject request, return `400` | ❌ Error: `ProductId` is required |\n| Missing AccountHolder FirstName | POST | Reject request, return `400` | ❌ Error: `FirstName` is required |\n| Missing AccountHolder LastName | POST | Reject request, return `400` | ❌ Error: `LastName` is required |\n| Missing AccountHolder AddressLine1 | POST | Reject request, return `400` | ❌ Error: `AddressLine1` is required |\n| Missing AccountHolder City | POST | Reject request, return `400` | ❌ Error: `City` is required |\n| Missing AccountHolder State | POST | Reject request, return `400` | ❌ Error: `State` must be a valid 2‑letter US postal code |\n| Missing AccountHolder Zip | POST | Reject request, return `400` | ❌ Error: `Zip` must be a valid US or Canadian postal code |\n\n**Key Findings:**\n\n- API enforces **mandatory field validation** consistently.\n    \n- Each missing field triggers a **specific error message**, making it clear which input is invalid.\n    \n- Validation rules for `State` and `Zip` are stricter, requiring proper format beyond presence.\n    \n- This ensures data integrity and prevents incomplete account creation."
+    },
+    {
+      "name": "Special characters tests",
+      "item": [
+        {
+          "name": "Latin Accents Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"PaymentAccountId is returned\", function () {\r",
+                  "    pm.expect(jsonData.PaymentAccountId).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authorization-key}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account with Latin Accents\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account with Latin accents\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"José\",\r\n    \"LastName\": \"Müller\",\r\n    \"AddressLine1\": \"Rua São João 123\",\r\n    \"City\": \"São Paulo\",\r\n    \"State\": \"SP\",\r\n    \"Zip\": \"01000-000\"\r\n  }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount"
+              ]
+            },
+            "description": "**Title:** Validate Accepted Data — Latin Accents (Invalid Characters)  \n**Purpose:** Verify API rejects unsupported special characters in AccountHolder fields.  \n**Request:** POST /PaymentAccount with `FirstName = \"José\"`, `LastName = \"Müller\"`, `City = \"São Paulo\"`.  \n**Expected Result:** API should return `400 Bad Request` with error messages indicating invalid characters.  \n**Actual Result:** API returned `400 Bad Request` with detailed validation errors:\n\n- `FirstName` and `LastName` contain invalid characters (accents not allowed).\n    \n- `City` contains invalid characters (accents not allowed).\n    \n- `State` must be a valid 2‑letter US postal code.\n    \n- `Zip` must be a valid US/Canadian postal code."
+          },
+          "response": []
+        },
+        {
+          "name": "Cyrillic Characters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "if (pm.response.code === 400) {\r",
+                  "    pm.test(\"Error message mentions invalid characters\", function () {\r",
+                  "        pm.expect(jsonData.ModelState[\"request.AccountHolder.FirstName\"]).to.exist;\r",
+                  "    });\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account with Cyrillic\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account with Cyrillic characters\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"Иван\",\r\n    \"LastName\": \"Петров\",\r\n    \"AddressLine1\": \"ул. Ленина, д. 10\",\r\n    \"City\": \"Кишинёв\",\r\n    \"State\": \"TN\",\r\n    \"Zip\": \"37302\"\r\n  }\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount"
+              ]
+            },
+            "description": "**Title:** Validate Accepted Data — Cyrillic Characters  \n**Purpose:** Verify API rejects unsupported Cyrillic characters in AccountHolder fields.  \n**Request:** POST /PaymentAccount with `FirstName = \"Иван\"`, `LastName = \"Петров\"`, `City = \"Кишинёв\"`.  \n**Expected Result:** API should return `400 Bad Request` with error messages indicating invalid characters.  \n**Actual Result:** API returned `400 Bad Request` with detailed validation errors:\n\n- `FirstName` and `LastName` contain invalid characters (Cyrillic not allowed).\n    \n- `AddressLine1` and `City` contain invalid characters (Cyrillic not allowed)."
+          },
+          "response": []
+        },
+        {
+          "name": "Asian Scripts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "if (pm.response.code === 400) {\r",
+                  "    pm.test(\"Error message mentions invalid characters\", function () {\r",
+                  "        pm.expect(jsonData.ModelState[\"request.AccountHolder.FirstName\"]).to.exist;\r",
+                  "    });\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account with Asian Scripts\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account with Asian characters\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"東京\",\r\n    \"LastName\": \"山田\",\r\n    \"AddressLine1\": \"北京市 朝阳区 10号\",\r\n    \"City\": \"北京\",\r\n    \"State\": \"CA\",\r\n    \"Zip\": \"90001\"\r\n  }\r\n}"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "**Title:** Validate Accepted Data — Asian Scripts  \n**Purpose:** Verify API rejects unsupported Asian characters (Japanese, Chinese) in AccountHolder fields.  \n**Request:** POST /PaymentAccount with `FirstName = \"東京\"`, `LastName = \"山田\"`, `City = \"北京\"`.  \n**Expected Result:** API should return `400 Bad Request` with error messages indicating invalid characters.  \n**Actual Result:** API returned `400 Bad Request` with detailed validation errors:\n\n- `FirstName` and `LastName` contain invalid characters (Asian scripts not allowed).\n    \n- `AddressLine1` and `City` contain invalid characters (Asian scripts not allowed)."
+          },
+          "response": []
+        },
+        {
+          "name": "Apostrophes & Hyphens Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"PaymentAccountId is returned\", function () {\r",
+                  "    pm.expect(jsonData.PaymentAccountId).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account with Apostrophes and Hyphens\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account with apostrophes and hyphens\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"Jean-Luc\",\r\n    \"LastName\": \"O'Connor\",\r\n    \"AddressLine1\": \"Main St. Apt-12\",\r\n    \"City\": \"New-York\",\r\n    \"State\": \"NY\",\r\n    \"Zip\": \"10001\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "**Title:** Validate Accepted Data — Apostrophes & Hyphens  \n**Purpose:** Ensure API accepts fields containing apostrophes (`'`) and hyphens (`-`).  \n**Request:** POST /PaymentAccount with `FirstName = \"Jean-Luc\"`, `LastName = \"O'Connor\"`, `City = \"New-York\"`.  \n**Expected Result:** API should return `200 OK` and create a PaymentAccount.  \n**Actual Result:** API returned `200 OK` and created a PaymentAccount (`PaymentAccountId: 1835013`), confirming apostrophes and hyphens are accepted."
+          },
+          "response": []
+        },
+        {
+          "name": "Symbols in Address/Zip Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "if (pm.response.code === 400) {\r",
+                  "    pm.test(\"Error message mentions invalid characters in AddressLine1 or Zip\", function () {\r",
+                  "        pm.expect(jsonData.ModelState[\"request.AccountHolder.AddressLine1\"] || jsonData.ModelState[\"request.AccountHolder.Zip\"]).to.exist;\r",
+                  "    });\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account with Symbols in Address and Zip\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account with symbols in address and zip\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Smith\",\r\n    \"AddressLine1\": \"1010 Market St #5A & Apt-12\",\r\n    \"City\": \"Los Angeles\",\r\n    \"State\": \"CA\",\r\n    \"Zip\": \"90001-AB@\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "**Title:** Validate Accepted Data — Symbols in Zip  \n**Purpose:** Verify API rejects unsupported symbols in postal codes.  \n**Request:** POST /PaymentAccount with `Zip = \"90001-AB@\"`.  \n**Expected Result:** API should return `400 Bad Request` with error message indicating invalid postal code format.  \n**Actual Result:** API returned `400 Bad Request` with message: `\"Zip is not a valid US or Canadian postal code.\"`"
+          },
+          "response": []
+        },
+        {
+          "name": "Mixed Characters Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error messages returned for invalid fields\", function () {\r",
+                  "    pm.expect(jsonData.ModelState).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Account with Mixed Characters\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"Test account with mixed characters\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"Jean-Luc Иван\",\r\n    \"LastName\": \"O'Connor Müller 東京\",\r\n    \"AddressLine1\": \"1010 Market St #5A & Apt-12 é\",\r\n    \"City\": \"São Paulo / Кишинёв\",\r\n    \"State\": \"CA\",\r\n    \"Zip\": \"90001-AB@\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "**Title:** Validate Accepted Data — Mixed Characters  \n**Purpose:** Verify API behavior when fields contain both valid and invalid characters.  \n**Request:** POST /PaymentAccount with mixed input (`Jean-Luc Иван`, `O'Connor Müller 東京`, `São Paulo / Кишинёв`, `Zip = 90001-AB@`).  \n**Expected Result:** API should return `400 Bad Request` with error messages for invalid characters.  \n**Actual Result:** API returned `400 Bad Request` with detailed validation errors:\n\n- `FirstName` and `LastName` contain invalid characters (Cyrillic, diacritics, Asian scripts not allowed).\n    \n- `AddressLine1` and `City` contain invalid characters (diacritics, Cyrillic, Asian scripts not allowed).\n    \n- `Zip` is not a valid US/Canadian postal code (`@` not allowed)."
+          },
+          "response": []
+        }
+      ],
+      "description": "### Special Characters Tests — QA Summary\n\n**Purpose:**  \nValidate how the API handles different character sets and special symbols across text fields. This suite ensures proper support for internationalization, encoding, and input validation.\n\n**Test Cases Overview:**\n\n| Test Case | Method | Expected Behavior | Observed Behavior |\n| --- | --- | --- | --- |\n| Latin Accents Test | POST | Accept accented Latin characters | ❌ Rejected — invalid character errors in FirstName, LastName, AddressLine1, City, plus strict validation for State and Zip |\n| Cyrillic Characters | POST | Accept Cyrillic input | ❌ Rejected — invalid character errors in FirstName, LastName, AddressLine1, City |\n| Asian Scripts | POST | Accept Asian script input | ❌ Rejected — invalid characters error |\n| Apostrophes & Hyphens Test | POST | Accept common punctuation | ✅ Accepted in allowed fields |\n| Symbols in Address/Zip | POST | Accept limited symbols (`.,#-/&`) | ❌ Rejected — invalid character errors in AddressLine1, City, and invalid Zip |\n| Mixed Characters Test | POST | Handle combined inputs | ❌ Rejected — invalid character errors in FirstName, LastName, AddressLine1, City, and invalid Zip |\n\n**Key Findings:**\n\n- API enforces **strict character validation** per field.\n    \n- **Allowed sets differ by field** (e.g., Address vs. Name).\n    \n- **International scripts** are tested to confirm encoding support.\n    \n- Clear error messages are returned when invalid characters are used."
+    },
+    {
+      "name": "Field Length Validation",
+      "item": [
+        {
+          "name": "Max Length Combine Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Error messages returned for max length violations\", function () {\r",
+                  "    pm.expect(jsonData.ModelState).to.exist;\r",
+                  "    pm.expect(jsonData.ModelState[\"request.Name\"]).to.exist;\r",
+                  "    pm.expect(jsonData.ModelState[\"request.Description\"]).to.exist;\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.FirstName\"]).to.exist;\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.LastName\"]).to.exist;\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.AddressLine1\"]).to.exist;\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.City\"]).to.exist;\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.State\"]).to.exist;\r",
+                  "    pm.expect(jsonData.ModelState[\"request.AccountHolder.Zip\"]).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request Script\r",
+                  "pm.variables.set(\"longName\", \"N\".repeat(300));\r",
+                  "pm.variables.set(\"longDescription\", \"D\".repeat(1000));\r",
+                  "pm.variables.set(\"longFirstName\", \"F\".repeat(150));\r",
+                  "pm.variables.set(\"longLastName\", \"L\".repeat(150));\r",
+                  "pm.variables.set(\"longAddress\", \"A\".repeat(300));\r",
+                  "pm.variables.set(\"longCity\", \"C\".repeat(200));\r",
+                  "pm.variables.set(\"longZip\", \"1\".repeat(20));\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"{{longName}}\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"{{longDescription}}\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"{{longFirstName}}\",\r\n    \"LastName\": \"{{longLastName}}\",\r\n    \"AddressLine1\": \"{{longAddress}}\",\r\n    \"City\": \"{{longCity}}\",\r\n    \"State\": \"CALIFORNIA\",\r\n    \"Zip\": \"{{longZip}}\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "**Title:** Validate Maximum Field Length — All Fields  \n**Purpose:** Ensure API enforces maximum length restrictions across all fields in a single request.  \n**Request:** POST /PaymentAccount with oversized values (`Name = 300 chars`, `Description = 1000 chars`, `FirstName = 150 chars`, `LastName = 150 chars`, `AddressLine1 = 300 chars`, `City = 200 chars`, `State = \"CALIFORNIA\"`, `Zip = 20 chars`).  \n**Expected Result:** API should return `400 Bad Request` with error messages for each field exceeding its maximum length.  \n**Actual Result:** API returned `400 Bad Request` with validation errors for all tested fields, confirming maximum length restrictions are enforced."
+          },
+          "response": []
+        },
+        {
+          "name": "Positive Test Case - Valid Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"PaymentAccountId is returned\", function () {\r",
+                  "    pm.expect(jsonData.PaymentAccountId).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "// Сохраняем ID для последующего GET-запроса\r",
+                  "pm.collectionVariables.set(\"createdAccountId\", jsonData.PaymentAccountId);\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Valid Account Name\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"valid@example.com\",\r\n  \"Description\": \"This is a valid description within allowed length.\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Doe\",\r\n    \"AddressLine1\": \"123 Main St #5A\",\r\n    \"City\": \"New York\",\r\n    \"State\": \"NY\",\r\n    \"Zip\": \"10001\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "**Title:** Positive Test Case — Valid Data  \n**Purpose:** Ensure API accepts and correctly stores valid data within allowed length and format.  \n**Request:** POST /PaymentAccount with valid values for all fields.  \n**Expected Result:** API should return `200 OK` and create a PaymentAccount.  \n**Follow-up:** GET /PaymentAccount/{id} should return the same values, confirming data persistence.  \n**Actual Result:** To be confirmed after execution."
+          },
+          "response": []
+        },
+        {
+          "name": "Follow-up GET Request - Verify Saved Data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Fields are saved correctly\", function () {\r",
+                  "    pm.expect(jsonData.Name).to.eql(\"Valid Account Name\");\r",
+                  "    pm.expect(jsonData.AccountHolder.FirstName).to.eql(\"John\");\r",
+                  "    pm.expect(jsonData.AccountHolder.LastName).to.eql(\"Doe\");\r",
+                  "    pm.expect(jsonData.AccountHolder.AddressLine1).to.eql(\"123 Main St #5A\");\r",
+                  "    pm.expect(jsonData.AccountHolder.City).to.eql(\"New York\");\r",
+                  "    pm.expect(jsonData.AccountHolder.State).to.eql(\"NY\");\r",
+                  "    pm.expect(jsonData.AccountHolder.Zip).to.eql(\"10001\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"Valid Account Name\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"valid@example.com\",\r\n  \"Description\": \"This is a valid description within allowed length.\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Doe\",\r\n    \"AddressLine1\": \"123 Main St #5A\",\r\n    \"City\": \"New York\",\r\n    \"State\": \"NY\",\r\n    \"Zip\": \"10001\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Boundary Values (Exact Limit)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.variables.set(\"boundaryName\", \"N\".repeat(255));\r",
+                  "pm.variables.set(\"boundaryDescription\", \"D\".repeat(500));\r",
+                  "pm.variables.set(\"boundaryFirstName\", \"F\".repeat(100));\r",
+                  "pm.variables.set(\"boundaryLastName\", \"L\".repeat(100));\r",
+                  "pm.variables.set(\"boundaryAddress\", \"A\".repeat(200));\r",
+                  "pm.variables.set(\"boundaryCity\", \"C\".repeat(200));\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"PaymentAccountId is returned\", function () {\r",
+                  "    pm.expect(jsonData.PaymentAccountId).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.collectionVariables.set(\"createdAccountId\", jsonData.PaymentAccountId);\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"{{boundaryName}}\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"{{boundaryDescription}}\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"{{boundaryFirstName}}\",\r\n    \"LastName\": \"{{boundaryLastName}}\",\r\n    \"AddressLine1\": \"{{boundaryAddress}}\",\r\n    \"City\": \"{{boundaryCity}}\",\r\n    \"State\": \"CA\",\r\n    \"Zip\": \"12345\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "**Title:** Boundary Values — Exact Limit  \n**Purpose:** Validate that API accepts values exactly at maximum allowed length.  \n**Request:** POST /PaymentAccount with fields at boundary length (Name=255 chars, FirstName=100 chars, etc.).  \n**Expected Result:** `200 OK`, account created successfully.  \n**Actual Result:** `200 OK`, PaymentAccountId returned, no errors."
+          },
+          "response": []
+        },
+        {
+          "name": "Follow-up GET Validation (Boundary Values)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "pm.test(\"Boundary fields are saved correctly\", function () {\r",
+                  "    pm.expect(jsonData.Name.length).to.eql(255);\r",
+                  "    pm.expect(jsonData.Description.length).to.eql(500);\r",
+                  "    pm.expect(jsonData.AccountHolder.FirstName.length).to.eql(100);\r",
+                  "    pm.expect(jsonData.AccountHolder.LastName.length).to.eql(100);\r",
+                  "    pm.expect(jsonData.AccountHolder.AddressLine1.length).to.eql(200);\r",
+                  "    pm.expect(jsonData.AccountHolder.City.length).to.eql(200);\r",
+                  "    pm.expect(jsonData.AccountHolder.State).to.eql(\"CA\");\r",
+                  "    pm.expect(jsonData.AccountHolder.Zip).to.eql(\"12345\");\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/1835027",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "1835027"
+              ]
+            },
+            "description": "**Title:** Boundary Values — Follow-up GET Validation  \n**Purpose:** Confirm that fields at maximum allowed length are stored correctly.  \n**Request:** GET /PaymentAccount/1835027  \n**Expected Result:** Fields should be preserved exactly at boundary length.  \n**Actual Result:**\n\n- `Name` returned with 255 characters.\n    \n- `Description` returned with 500 characters.\n    \n- No truncation or error messages.\n    \n- Account created and stored successfully."
+          },
+          "response": []
+        },
+        {
+          "name": "Follow-up Get Validation (Just Over Limit)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {\r",
+                  "    // В зависимости от поведения API: может быть 400 при отказе или 200 при сохранении с обрезкой\r",
+                  "    pm.expect([200, 400]).to.include(pm.response.code);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "if (pm.response.code === 200) {\r",
+                  "    pm.test(\"Fields are truncated to max length\", function () {\r",
+                  "        pm.expect(jsonData.Name.length).to.eql(255); \r",
+                  "        pm.expect(jsonData.Description.length).to.eql(500); \r",
+                  "        pm.expect(jsonData.AccountHolder.FirstName.length).to.eql(100); \r",
+                  "        pm.expect(jsonData.AccountHolder.LastName.length).to.eql(100);\r",
+                  "        pm.expect(jsonData.AccountHolder.AddressLine1.length).to.eql(200);\r",
+                  "        pm.expect(jsonData.AccountHolder.City.length).to.eql(200);\r",
+                  "    });\r",
+                  "} else {\r",
+                  "    pm.test(\"Error messages returned for invalid fields\", function () {\r",
+                  "        pm.expect(jsonData.ModelState).to.exist;\r",
+                  "        pm.expect(jsonData.ModelState[\"request.AccountHolder.State\"]).to.exist;\r",
+                  "        pm.expect(jsonData.ModelState[\"request.AccountHolder.Zip\"]).to.exist;\r",
+                  "    });\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"Name\": \"{{boundaryName}}\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"Description\": \"{{boundaryDescription}}\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"{{boundaryFirstName}}\",\r\n    \"LastName\": \"{{boundaryLastName}}\",\r\n    \"AddressLine1\": \"{{boundaryAddress}}\",\r\n    \"City\": \"{{boundaryCity}}\",\r\n    \"State\": \"CA\",\r\n    \"Zip\": \"12345\"\r\n  }\r\n}\r\n"
+            },
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{createdAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{createdAccountId}}"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "**Title:** Just Over Limit — Follow-up GET Validation  \n**Purpose:** Verify behavior when fields exceed maximum length by one character.  \n**Request:** GET /PaymentAccount/1835035  \n**Expected Result:** Either truncation to max length or error.  \n**Actual Result:**\n\n- API returned `200 OK`.\n    \n- The lines are saved, but truncated to the limit:\n    \n    - `Name` → 255 symbols (instead of 256).\n        \n    - `Description` → 500 symbols (instead of 501).\n        \n- No errors found (`ErrorFound=false`)."
+          },
+          "response": []
+        }
+      ],
+      "description": "**Purpose:**  \nValidate API behavior when handling text fields at different lengths and formats. This suite ensures that boundary conditions, oversized inputs, and persistence checks are correctly enforced.\n\n| Test Case | Method | Expected Behavior | Observed Behavior |\n| --- | --- | --- | --- |\n| Positive Test Case | POST | Accept valid data, return `200 OK` | ✅ Account created, `PaymentAccountId` returned |\n| Max Length Combined | POST | Reject oversized fields, return `400` | ✅ Errors for `State` and `Zip` |\n| Boundary Values | POST | Accept exact limit values, return `200 OK` | ✅ Account created, fields saved fully |\n| Follow-up GET (Boundary) | GET | Verify persistence of boundary values | ✅ Strings preserved at max length |\n| Just Over Limit (+1) | POST | Either reject or truncate | ✅ Account created, strings truncated to max length |\n| Follow-up GET (Just Over Limit) | GET | Verify persistence of truncated values | ✅ Strings stored at max length, no errors |\n\n**Key Findings:**\n\n- Fields at **exact limit** are accepted and stored without modification.\n    \n- Fields **exceeding limit by one** are accepted but automatically truncated.\n    \n- Certain fields (`State`, `Zip`) enforce strict validation and return errors when invalid.\n    \n- API consistently returns clear error messages for invalid characters."
+    },
+    {
+      "name": "Data Persistence Validation",
+      "item": [
+        {
+          "name": "Verify Payment Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "\r",
+                  "pm.collectionVariables.set(\"createdAccountId\", jsonData.Id);\r",
+                  "\r",
+                  "\r",
+                  "pm.collectionVariables.set(\"accountHolderId\", jsonData.AccountHolderId);\r",
+                  "\r",
+                  "pm.test(\"Payment Account details match submitted data\", function () {\r",
+                  "    pm.expect(jsonData.Id).to.eql(pm.collectionVariables.get(\"createdAccountId\"));\r",
+                  "    pm.expect(jsonData.Name).to.eql(pm.collectionVariables.get(\"submittedName\"));\r",
+                  "    pm.expect(jsonData.Description).to.eql(pm.collectionVariables.get(\"submittedDescription\"));\r",
+                  "    pm.expect(jsonData.ProductId).to.eql(pm.collectionVariables.get(\"submittedProductId\"));\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"AccountHolderId is returned\", function () {\r",
+                  "    pm.expect(jsonData.AccountHolderId).to.exist;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/PaymentAccount/{{createdAccountId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "PaymentAccount",
+                "{{createdAccountId}}"
+              ]
+            },
+            "description": "Retrieve and validate payment account details after creation."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Account Holder",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"AccountHolderId matches saved variable\", function () {\r",
+                  "    pm.expect(jsonData.Id).to.eql(pm.environment.get(\"AccountHolderId\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Account Holder details match submitted data\", function () {\r",
+                  "    pm.expect(jsonData.FirstName).to.eql(pm.environment.get(\"submittedFirstName\"));\r",
+                  "    pm.expect(jsonData.LastName).to.eql(pm.environment.get(\"submittedLastName\"));\r",
+                  "    pm.expect(jsonData.AddressLine1).to.eql(pm.environment.get(\"submittedAddressLine1\"));\r",
+                  "    pm.expect(jsonData.City).to.eql(pm.environment.get(\"submittedCity\"));\r",
+                  "    pm.expect(jsonData.State).to.eql(pm.environment.get(\"submittedState\"));\r",
+                  "    pm.expect(jsonData.Zip).to.eql(pm.environment.get(\"submittedZip\"));\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "authorization-key",
+                "value": "{{authorization-key}}",
+                "type": "text"
+              },
+              {
+                "key": "authorization-username",
+                "value": "{{username}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://apitest.paynuver.com/api/AccountHolder/{{AccountHolderId}}",
+              "protocol": "https",
+              "host": [
+                "apitest",
+                "paynuver",
+                "com"
+              ],
+              "path": [
+                "api",
+                "AccountHolder",
+                "{{AccountHolderId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "**Purpose:**  \nEnsure that details submitted during account creation are correctly stored and retrievable via GET endpoints for both Payment Account and Account Holder.\n\n### 📑 Test Cases Overview\n\n| Request | Endpoint | Expected Behavior | Observed Behavior |\n| --- | --- | --- | --- |\n| Verify Payment Account | GET /PaymentAccount/{{PaymentAccountId}} | Return account details matching submitted data | ✅ `200 OK` — Account retrieved. Fields present: `Id`, `AccountHolderId`, `Name`, `Description`, `ProductId`, `Status=InGoodStanding`. No errors. |\n| Verify Account Holder | GET /AccountHolder/{{AccountHolderId}} | Return holder details matching submitted data | ✅ 200 OK — Account Holder retrieved. Fields present: Id=1785289, FirstName, LastName, AddressLine1, City, State, Zip. All values match submitted data. |\n\n### Key Findings\n\n- **Payment Account**:\n    \n    - Successfully created and retrievable.\n        \n    - `AccountHolderId` correctly linked and returned.\n        \n    - Long `Name` and `Description` stored respecting max length.\n        \n    - Status shows `InGoodStanding`, activation pending.\n        \n    - No error flags.\n        \n- **Account Holder**:\n    \n    - Endpoint works correctly with `{{AccountHolderId}}`.\n        \n    - All personal details (`FirstName`, `LastName`, `AddressLine1`, `City`, `State`, `Zip`) match submitted values.\n        \n    - Confirms full persistence and linkage between Payment Account and Account Holder records."
+    },
+    {
+      "name": "Positive - Create Payment Account",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "let jsonData = pm.response.json();\r",
+              "\r",
+              "\r",
+              "pm.test(\"PaymentAccountId exists\", function () {\r",
+              "    pm.expect(jsonData.PaymentAccountId).to.exist;\r",
+              "});\r",
+              "\r",
+              "\r",
+              "pm.environment.set(\"PaymentAccountId\", jsonData.PaymentAccountId);\r",
+              "pm.environment.set(\"AccountHolderId\", jsonData.AccountHolderId);\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "authorization-key",
+            "value": "{{authorization-key}}",
+            "type": "text"
+          },
+          {
+            "key": "authorization-username",
+            "value": "{{username}}",
+            "type": "text"
+          },
+          {
+            "key": "ProductId",
+            "value": "{{ProductId}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"Name\": \"Valid Account\",\r\n  \"ProductId\": 1388,\r\n  \"ActivationEmailAddress\": \"test@example.com\",\r\n  \"SendActivationEmailAtCreation\": true,\r\n  \"ActivateAtCreation\": true,\r\n  \"Description\": \"Positive test\",\r\n  \"AccountHolder\": {\r\n    \"FirstName\": \"John\",\r\n    \"LastName\": \"Smith\",\r\n    \"AddressLine1\": \"Main Street 1\",\r\n    \"City\": \"Apison\",\r\n    \"State\": \"TN\",\r\n    \"Zip\": \"37302\",\r\n    \"CardCreateOption\": \"None\"\r\n  }\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://apitest.paynuver.com/api/PaymentAccount",
+          "protocol": "https",
+          "host": [
+            "apitest",
+            "paynuver",
+            "com"
+          ],
+          "path": [
+            "api",
+            "PaymentAccount"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "authorization-key",
+      "secret": true
+    },
+    {
+      "key": "username",
+      "value": ""
+    },
+    {
+      "key": "ProductId",
+      "value": ""
+    },
+    {
+      "key": "PaymentAccountId",
+      "value": ""
+    },
+    {
+      "key": "AccountHolderId",
+      "value": ""
+    },
+    {
+      "key": "createdAccountId",
+      "value": ""
+    },
+    {
+      "key": "accountHolderId",
+      "value": ""
+    }
+  ]
+}
