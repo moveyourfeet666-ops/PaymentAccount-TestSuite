@@ -1,0 +1,17 @@
+# OS system files
+.DS_Store
+Thumbs.db
+
+# Node modules 
+node_modules/
+
+# Private environment with real tokens
+environment_private.json
+
+# Ignore local reports
+reports/*.html
+reports/*.json
+
+# IDE configs
+.vscode/
+.idea/
